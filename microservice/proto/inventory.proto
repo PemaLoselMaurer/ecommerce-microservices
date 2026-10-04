@@ -1,0 +1,40 @@
+syntax = "proto3";
+package inventory;
+option go_package = "ecommerce-microservices/proto";
+
+service InventoryService {
+  rpc GetStock (GetStockRequest) returns (StockItem);
+  rpc ReserveStock (ReserveStockRequest) returns (StockItem);
+  rpc WatchStock (WatchStockRequest) returns (stream StockItem);
+  rpc SyncStock (stream StockAdjustment) returns (stream StockAlert);
+}
+
+message StockItem {
+  string product_id = 1;
+  int32 quantity = 2;
+}
+
+message GetStockRequest {
+  string product_id = 1;
+}
+
+message ReserveStockRequest {
+  string product_id = 1;
+  int32 quantity = 2;
+}
+
+message WatchStockRequest {
+  string product_id = 1;
+}
+
+message StockAdjustment {
+  string product_id = 1;
+  int32 delta = 2;
+}
+
+message StockAlert {
+  string product_id = 1;
+  int32 new_quantity = 2;
+  bool low_stock = 3;
+  string message = 4;
+}

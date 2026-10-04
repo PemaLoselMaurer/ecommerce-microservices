@@ -1,0 +1,38 @@
+syntax = "proto3";
+package customer;
+option go_package = "ecommerce-microservices/proto";
+
+service CustomerService {
+  rpc GetCustomer (GetCustomerRequest) returns (Customer);
+  rpc CreateCustomer (CreateCustomerRequest) returns (Customer);
+
+  // Authenticate checks an email and password pair and returns
+  // the matching customer. The Customer Service owns customer
+  // identity, so it is also the only service that ever sees a
+  // password; callers receive a Customer with no credential on
+  // it and turn that into a session of their own.
+  rpc Authenticate (AuthenticateRequest) returns (Customer);
+}
+
+message Customer {
+  string customer_id = 1;
+  string name = 2;
+  string email = 3;
+  string address = 4;
+}
+
+message GetCustomerRequest {
+  string customer_id = 1;
+}
+
+message CreateCustomerRequest {
+  string name = 1;
+  string email = 2;
+  string address = 3;
+  string password = 4;
+}
+
+message AuthenticateRequest {
+  string email = 1;
+  string password = 2;
+}

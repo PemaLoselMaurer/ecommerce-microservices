@@ -1,0 +1,22 @@
+syntax = "proto3";
+package notification;
+option go_package = "ecommerce-microservices/proto";
+
+service NotificationService {
+  rpc Notify (Notification) returns (NotifyResponse);
+  rpc SubscribeNotifications (SubscribeRequest) returns (stream Notification);
+}
+
+message Notification {
+  string customer_id = 1;
+  string message = 2;
+  int64 timestamp = 3;
+}
+
+message NotifyResponse {
+  bool delivered = 1;
+}
+
+message SubscribeRequest {
+  string customer_id = 1;
+}

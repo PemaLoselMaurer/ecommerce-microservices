@@ -1,0 +1,14 @@
+{
+  "name": "calculate-order-price",
+  "main": "./build/worker.mjs",
+  "compatibility_date": "2026-09-01",
+  "build": {
+    "command": "npm run build"
+  },
+  "observability": {
+    "enabled": true
+  }
+  // PRICING_API_TOKEN is a secret and is never stored here. Set it with
+  //   npx wrangler secret put PRICING_API_TOKEN
+  // and, for `wrangler dev`, in a git-ignored .dev.vars file.
+}

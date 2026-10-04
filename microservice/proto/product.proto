@@ -1,0 +1,45 @@
+syntax = "proto3";
+package product;
+option go_package = "ecommerce-microservices/proto";
+
+service ProductService {
+
+ rpc GetProduct (GetProductRequest) returns (Product);
+
+ // ListProducts streams the catalogue, optionally narrowed to
+ // a single category. It is what the storefront's product grid
+ // is built from, so the UI never needs a hard-coded list of
+ // product IDs.
+ rpc ListProducts (ListProductsRequest) returns (stream Product);
+}
+message GetProductRequest {
+ string product_id = 1;
+}
+message ListProductsRequest {
+ // Empty returns the whole catalogue.
+ string category = 1;
+}
+message Product {
+ string product_id = 1;
+ string name = 2;
+
+ // price is what the customer actually pays.
+ double price = 3;
+
+ string category = 4;
+ string description = 5;
+
+ // list_price is the pre-discount price. It is 0 when the
+ // product is not on offer; when it is above price, the
+ // storefront shows the saving.
+ double list_price = 6;
+
+ // badge is an optional merchandising label such as "NEW" or
+ // "BESTSELLER". Empty means no label.
+ string badge = 7;
+
+ // rating is the average customer rating out of 5, and
+ // review_count how many ratings it is drawn from.
+ double rating = 8;
+ int32 review_count = 9;
+}

@@ -1,0 +1,10 @@
+node_modules/
+.dev.vars*
+.env*
+.wrangler/
+test-results/
+playwright-report/
+microservice/.run/*
+!microservice/.run/check.sh
+*.log
+*.pid
