@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 	"testing"
 
 	pb "ecommerce-microservices/proto"
@@ -82,6 +83,36 @@ func TestQuoteMapsPricingFailures(t *testing.T) {
 			}
 			if view := decodeError(t, response); view.Error == "" || view.Code != tc.code.String() {
 				t.Errorf("error view = %+v", view)
+			}
+		})
+	}
+}
+
+func TestPricingOutagesNameThePricingService(t *testing.T) {
+	// When the Order Service is fine but the pricing function is
+	// not, the customer is told so — without the Worker's URL or
+	// the network error that the Order Service reported.
+	cases := []struct {
+		name, wantContain string
+		err               error
+	}{
+		{"unreachable", "unavailable", status.Error(codes.Unavailable,
+			`pricing service is unreachable: Post "https://calculate-order-price.example.workers.dev/price": dial tcp: lookup failed`)},
+		{"not deployed", "unavailable", status.Error(codes.Unavailable,
+			"pricing service is not deployed at the configured address (HTTP 404)")},
+		{"timeout", "too long", status.Error(codes.DeadlineExceeded,
+			"pricing service did not respond within 3s")},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			message := friendlyMessage("Order Service", tc.err)
+			if !strings.Contains(message, "pricing service") || !strings.Contains(message, tc.wantContain) {
+				t.Errorf("message %q does not blame the pricing service", message)
+			}
+			for _, leak := range []string{"Order Service", "workers.dev", "dial tcp", "HTTP 404"} {
+				if strings.Contains(message, leak) {
+					t.Errorf("message %q contains %q", message, leak)
+				}
 			}
 		})
 	}

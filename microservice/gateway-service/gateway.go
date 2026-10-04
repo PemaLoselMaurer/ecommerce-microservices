@@ -487,12 +487,24 @@ func httpStatusFor(code codes.Code) int {
 func friendlyMessage(service string, err error) string {
 	st, _ := status.FromError(err)
 
+	// The Order Service reports pricing-function outages with a
+	// message starting "pricing service". The Order Service
+	// itself is fine in that case, so the customer is told what
+	// actually failed, still without the Worker's address.
+	pricingFault := strings.HasPrefix(st.Message(), "pricing service")
+
 	switch st.Code() {
 	case codes.Unavailable:
+		if pricingFault {
+			return "The pricing service is unavailable right now, so your order could not be priced. Please try again shortly."
+		}
 		return fmt.Sprintf(
 			"The %s is unavailable right now. Please try again shortly.", service,
 		)
 	case codes.DeadlineExceeded:
+		if pricingFault {
+			return "The pricing service took too long to respond, so your order could not be priced. Please try again."
+		}
 		return fmt.Sprintf(
 			"The %s took too long to respond and the request timed out.", service,
 		)
